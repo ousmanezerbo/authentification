@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Authentification Faciale PGI</title>
+    <style>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Authentification Faciale PGI</h1><br>
+        <button onclick="enrollNewUser()" title="Ajouter un nouvel utilisateur">S'enroller</button>
+        <button onclick="authenticateUser()" title="S'autentifier">S'autentifier</button>
+    </div>
+    <div id="faceio-modal"></div>
+    <script src="https://cdn.faceio.net/fio.js"></script>
+    <script type="text/javascript">
+        const faceio = new faceIO("fioa7b9a");
+    
+        function enrollNewUser() {
+            faceio.enroll({
+                "locale": "auto",
+                "userConsent": false,
+                "payload": {
+                    "whoami": 123456,
+                    "email": "john.doe@example.com"
+                }
+            }).then(userInfo => {
+                handleEnrollSuccess(userInfo);
+            }).catch(errCode => {
+                handleError(errCode);
+                faceio.restartSession();
+            });
+        }
+    
+        function authenticateUser() {
+            faceio.authenticate({
+                "locale": "auto",
+            }).then(userData => {
+                handleAuthSuccess(userData);
+            }).catch(errCode => {
+                handleError(errCode);
+                faceio.restartSession();
+            });
+        }
+
+        function handleEnrollSuccess(userInfo) {
+            alert(
+                `User Successfully Enrolled! Details:
+                Unique Facial ID: ${userInfo.facialId}
+                Enrollment Date: ${userInfo.timestamp}
+                Gender: ${userInfo.details.gender}
+                Age Approximation: ${userInfo.details.age}`
+            );
+            console.log(userInfo);
+        }
+
+        function handleAuthSuccess(userData) {
+            console.log("Success, user recognized");
+            console.log("Linked facial ID: " + userData.facialId);
+            console.log("Associated Payload: " + JSON.stringify(userData.payload));
+            window.location.href = "totp.php";
+        }
+
+        function handleError(errCode) {
+            switch (errCode) {
+                case fioErrCode.PERMISSION_REFUSED:
+                    console.log("Accès à la caméra refusée");
+                    break;
+                default:
+                    console.log("Une erreur s'est produite: " + errCode);
+                    break;
+            }
+        }
+    </script>
+
+    <footer class="bg-white">
+        <div class="container text-center">
+            <p class="text-muted mb-0 py-2">© 2023 M1SSI Ousmane Boun Afane Zerbo.</p>
+        </div>
+    </footer>
+</body>
+</html>
